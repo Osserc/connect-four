@@ -123,22 +123,31 @@ class Grid
 end
 
 class Game
+    include Grid_Navigation
 
     def start_game
+        turn = 1
         grid = Grid.new
-        player_one, player_two = make_players
-        play_round(grid, player_one, player_two)
+        player_one, player_two = make_players_dummy
+        grid.display_grid
+        loop do
+            play_round(grid, turn, player_one, player_two)
+            
+            turn += 1
+
+        end
     end
 
-    def play_round(grid, player_one, player_two)
-        player_one.place_token(grid, choose_placement) if turn.odd?
-        player_two.place_token(grid, choose_placement) if !turn.odd?
+    def play_round(grid, turn, player_one, player_two)
+        player_one.place_token(grid, choose_placement(grid, player_one)) if turn.odd?
+        player_two.place_token(grid, choose_placement(grid, player_two)) if !turn.odd?
         grid.display_grid
     end
 
     def make_players_dummy
         player_one = Player.new("Fran", "F")
         player_two = Player.new("Kolb", "K")
+        return player_one, player_two
     end
 
     def make_players
@@ -181,17 +190,23 @@ class Game
         return symbol_one, symbol_two
     end
 
-    def choose_placement
-        puts "Pick the column in which you want to place your token."
-        col = gets.chomp
-        until col.length == 1 && col >= 1 && col <= 7 && check_placement_validity(col)
+    def choose_placement(grid, player)
+        puts "#{player.name}, pick the column in which you want to place your token."
+        col = gets.chomp.to_i
+        until col >= 1 && col <= 7 && check_placement_validity(grid, col)
             puts "Invalid column."
-            col = gets.chomp
+            col = gets.chomp.to_i
         end
+        col
     end
 
-    def check_placement_validity(col)
-
+    def check_placement_validity(grid, col)
+        empty = 0
+        columns = define_columns
+        columns[col - 1].each do | element |
+            empty += 1 if grid.grid[element] == " "
+        end
+        empty > 0
     end
 
 end
@@ -232,11 +247,4 @@ class Token
 end
 
 
-board = Grid.new
-board.define_win_conditions_full
-# player_one = Player.new("Fran", "F")
-# player_two = Player.new("Kolb", "K")
-# board.display_grid
-# player_one.place_token(board, 2)
-# board.display_grid
-puts "STOP"
+Game.new.start_game
