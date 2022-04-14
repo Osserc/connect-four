@@ -3,6 +3,8 @@ class Grid
 
     def initialize
         @grid = make_grid
+        @left_border = define_single_column(0)
+        @right_border = define_single_column(6)
     end
 
     def make_grid
@@ -25,7 +27,6 @@ class Grid
     def define_columns
         columns = Array.new
         k = 0
-        i = 0
         until k == 7 do
             columns << define_single_column(k)
             k += 1
@@ -39,8 +40,39 @@ class Grid
         single_column
     end
 
-    def place_token(column)
+    def define_win_conditions_full
+        win_conditions = Array.new
 
+    end
+
+    def define_win_conditions_vertical
+        win_conditions = Array.new
+
+    end
+
+    def define_win_conditions_horizontal
+        win_conditions = Array.new
+
+    end
+
+    def define_win_conditions_diagonal
+        win_conditions = Array.new
+
+    end
+
+    def prune_border_crossing
+
+    end
+
+    def place_token(column)
+        columns = define_columns
+        target = columns[column - 1]
+        target.reverse.each do | element |
+            if self.grid[element] == " "
+                self.grid[element] = "F"
+                return
+            end
+        end
     end
 
 end
@@ -108,7 +140,7 @@ end
 
 class Token
 
-    def initialize(aymbol = nil)
+    def initialize(symbol = nil)
         @symbol = symbol
     end
 
@@ -118,4 +150,5 @@ end
 # board = Grid.new
 # board.display_grid
 # board.define_columns
+# board.place_token(2)
 # puts "STOP"
