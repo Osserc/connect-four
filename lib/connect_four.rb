@@ -126,15 +126,16 @@ class Game
     include Grid_Navigation
 
     def start_game
+        puts "Welcome, welcome! This is the famed, fabled, fabulous Connect Four! Match 4 of your own token either diagonally, horizontally or vertically to win! But beware of your opponent!"
         turn = 1
         grid = Grid.new
-        player_one, player_two = make_players_dummy
+        win_cons = define_win_conditions_full
+        player_one, player_two = make_players
         grid.display_grid
         loop do
             play_round(grid, turn, player_one, player_two)
-            
+            check_winner(grid, win_cons, turn, player_one, player_two)
             turn += 1
-
         end
     end
 
@@ -144,11 +145,11 @@ class Game
         grid.display_grid
     end
 
-    def make_players_dummy
-        player_one = Player.new("Fran", "F")
-        player_two = Player.new("Kolb", "K")
-        return player_one, player_two
-    end
+    # def make_players_dummy
+    #     player_one = Player.new("Fran", "F")
+    #     player_two = Player.new("Kolb", "K")
+    #     return player_one, player_two
+    # end
 
     def make_players
         name_one, name_two = names_input
@@ -209,6 +210,47 @@ class Game
         empty > 0
     end
 
+    def check_winner(grid, win_cons, turn, player_one, player_two)
+        if turn < 42
+            win_cons.each do | element |
+                if check_tokens(grid, element, player_one, player_two) == 1
+                    puts "#{player_one.name} won!"
+                    restart_game
+                elsif check_tokens(grid, element, player_one, player_two) == 2
+                    puts "#{player_two.name} won!"
+                    restart_game
+                end
+            end
+        else
+            puts "It's a tie!"
+            restart_game
+        end
+    end
+
+    def check_tokens(grid, win_con, player_one, player_two)
+        tokens_one = 0
+        tokens_two = 0
+        win_con.each do | element |
+            if grid.grid[element] != " "
+                tokens_one += 1 if grid.grid[element].symbol == player_one.symbol
+                tokens_two += 1 if grid.grid[element].symbol == player_two.symbol
+            end
+        end
+        return 1 if tokens_one == 4
+        return 2 if tokens_two == 4
+    end
+
+    def restart_game
+        puts "Do you want to play another round? Enter yes or no."
+        answer = gets.chomp.downcase
+        until answer == "yes" || answer == "no" do
+            puts "Please answer he question."
+            answer = gets.chomp.downcase
+        end
+        Game.new.start_game if answer == "yes"
+        exit if answer == "no"
+    end
+
 end
 
 class Player
@@ -235,13 +277,10 @@ class Player
 end
 
 class Token
-    attr_reader :symbol, :total
-
-    @@total = 0
+    attr_reader :symbol
 
     def initialize(symbol = nil)
         @symbol = symbol
-        @@total += 1
     end
 
 end
